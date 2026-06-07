@@ -1,0 +1,34 @@
+{
+  "data": [
+    {
+      "id": "alert-001",
+      "title": "PowerShell encoded command execution",
+      "alert_type": "Attacker Behavior Detected",
+      "alert_type_description": "Encoded PowerShell command line was executed on a monitored endpoint.",
+      "created_time": "2024-01-15T08:22:13.000Z",
+      "first_event_time": "2024-01-15T08:22:13.000Z",
+      "latest_event_time": "2024-01-15T08:22:13.000Z",
+      "alert_source": "Endpoint Detection",
+      "detection_rule_rrn": {
+        "rule_name": "Suspicious PowerShell Activity",
+        "rule_rrn": "rrn:cba:us1:abc123:detection-rule:POWERSHELL01"
+      }
+    },
+    {
+      "id": "alert-002",
+      "title": "Multiple failed SSH authentication attempts from single source",
+      "alert_type": "Brute Force",
+      "alert_type_description": "More than 20 failed SSH logins from a single source within 60 seconds.",
+      "created_time": "2024-01-15T02:14:00.000Z",
+      "first_event_time": "2024-01-15T02:14:00.000Z",
+      "latest_event_time": "2024-01-15T02:18:00.000Z",
+      "alert_source": "User Behavior Analytics"
+    }
+  ],
+  "metadata": {
+    "index": 0,
+    "size": 20,
+    "total_data": 2,
+    "total_pages": 1
+  }
+}

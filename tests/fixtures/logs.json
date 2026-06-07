@@ -1,0 +1,26 @@
+{
+  "logs": [
+    {
+      "id": "aabbccdd-1111-2222-3333-444455556666",
+      "name": "Firewall Logs",
+      "rrn": "rrn:log:us1:abc123:log:aabbccdd-1111-2222-3333-444455556666",
+      "source_type": "syslog",
+      "retention_period": "30 days",
+      "tokens": [],
+      "links": [
+        {"rel": "self", "href": "/management/logs/aabbccdd-1111-2222-3333-444455556666"}
+      ]
+    },
+    {
+      "id": "eeffgghh-4444-5555-6666-777788889999",
+      "name": "Endpoint Activity Logs",
+      "rrn": "rrn:log:us1:abc123:log:eeffgghh-4444-5555-6666-777788889999",
+      "source_type": "token",
+      "retention_period": "60 days",
+      "tokens": ["ep-tok-aaaa-bbbb"],
+      "links": [
+        {"rel": "self", "href": "/management/logs/eeffgghh-4444-5555-6666-777788889999"}
+      ]
+    }
+  ]
+}

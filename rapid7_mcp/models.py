@@ -339,6 +339,60 @@ class InvestigationList(BaseModel):
     metadata: dict = {}
 
 
+class DetectionRule(BaseModel):
+    rule_name: str = Field(alias="ruleName")
+    rule_rrn: str = Field(alias="ruleRrn")
+
+    model_config = {"populate_by_name": True}
+
+
+class InvestigationAlert(BaseModel):
+    id: str
+    title: str
+    alert_type: str = Field(alias="alertType")
+    alert_type_description: str = Field(alias="alertTypeDescription")
+    created_time: str = Field(alias="createdTime")
+    first_event_time: str | None = Field(None, alias="firstEventTime")
+    latest_event_time: str | None = Field(None, alias="latestEventTime")
+    alert_source: str = Field(alias="alertSource")
+    detection_rule_rrn: DetectionRule | None = Field(None, alias="detectionRuleRrn")
+
+    model_config = {"populate_by_name": True}
+
+
+class InvestigationAlertList(BaseModel):
+    data: list[InvestigationAlert] = []
+    metadata: dict = {}
+
+
+class InvestigationSort(BaseModel):
+    field: str
+    order: str  # ASC | DESC
+
+
+class InvestigationSearchRequest(BaseModel):
+    search: list[SearchCriterion] = []
+    sort: list[InvestigationSort] = []
+    start_time: str | None = None
+    end_time: str | None = None
+
+
+class HealthMetric(BaseModel):
+    """A single health metric entry from /idr/v1/health-metrics.
+
+    The spec leaves ``data`` items as generic objects, so the model is
+    intentionally permissive. Each entry typically includes resource,
+    resource_type, time, request_count, error_count, etc.
+    """
+
+    model_config = {"populate_by_name": True, "extra": "allow"}
+
+
+class HealthMetricList(BaseModel):
+    data: list[HealthMetric] = []
+    metadata: dict = {}
+
+
 # ---------------------------------------------------------------------------
 # InsightIDR — Log Search (LEQL)
 # ---------------------------------------------------------------------------
@@ -372,6 +426,22 @@ class LogSearchResults(BaseModel):
     id: str | None = None
     progress: int | None = None
     links: list[Link] = []
+
+
+class LogInfo(BaseModel):
+    id: str
+    name: str
+    rrn: str | None = None
+    source_type: str | None = Field(None, alias="sourceType")
+    retention_period: str | None = Field(None, alias="retentionPeriod")
+    tokens: list[str] = []
+    links: list[Link] = []
+
+    model_config = {"populate_by_name": True}
+
+
+class LogInfoList(BaseModel):
+    logs: list[LogInfo] = []
 
 
 # ---------------------------------------------------------------------------

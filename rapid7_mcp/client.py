@@ -94,15 +94,31 @@ def _resolve_idr_fixture(method: str, path: str) -> str | None:
     # /idr/v2/investigations[/{id}]
     if "investigations" in parts:
         idx = parts.index("investigations")
-        return "investigations.json" if idx == len(parts) - 1 else "investigation.json"
+        if idx == len(parts) - 1:
+            return "investigations.json"
+        # /idr/v2/investigations/_search
+        if method == "POST" and parts[idx + 1] == "_search":
+            return "investigations.json"
+        # /idr/v2/investigations/{id}/alerts
+        if idx + 2 < len(parts) and parts[idx + 2] == "alerts":
+            return "investigation_alerts.json"
+        return "investigation.json"
 
     # /idr/v2/iocs
     if "iocs" in parts:
         return "indicators.json"
 
+    # /idr/v1/health-metrics
+    if "health-metrics" in parts:
+        return "health_metrics.json"
+
     # POST /query/logs
     if method == "POST" and len(parts) == 2 and parts[0] == "query" and parts[1] == "logs":
         return "log_search_results.json"
+
+    # GET /management/logs
+    if method == "GET" and len(parts) == 2 and parts[0] == "management" and parts[1] == "logs":
+        return "logs.json"
 
     return None
 
