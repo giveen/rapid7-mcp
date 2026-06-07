@@ -1,6 +1,7 @@
 """Async HTTP clients for Rapid7 InsightVM, InsightIDR, and Metasploit Pro."""
 
 import json
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -159,31 +160,76 @@ def _resolve_msp_fixture(method: str, path: str) -> str | None:
 
 
 class InsightVMClient:
-    """Async HTTP wrapper for the InsightVM REST API (v3).
+    """Async HTTP wrapper for the InsightVM REST API.
 
-    Uses Basic Auth against an on-prem console.
+    Two topologies are supported via ``settings.insight_install``:
+
+    * ``local`` (default) — on-prem console. Basic Auth, ``/api/3`` paths.
+      Docs: https://help.rapid7.com/insightvm/en-us/api/index.html
+    * ``cloud`` — Insight Platform managed. X-Api-Key, ``/vm/v1`` paths.
+      Docs: https://help.rapid7.com/insightvm/en-us/api/integrations.html
+
+    The local and cloud APIs use different endpoint paths and response shapes;
+    in cloud mode the existing routers will still call ``/api/3`` paths and
+    most calls will fail until each router is rewired. A warning is emitted
+    on first construction in cloud mode.
     """
 
+    _CLOUD_WARNING_EMITTED = False
+
+    def _request_kwargs(self) -> dict[str, Any]:
+        """Return the per-request auth/headers for the active install type."""
+        if self._auth is not None:
+            return {"auth": self._auth}
+        if self._headers is not None:
+            return {"headers": self._headers}
+        return {}
+
     def __init__(self, settings: Settings) -> None:
-        self.base_url = f"{settings.console_url}/api/3"
-        self._auth = (settings.username, settings.password)
-        self._verify = settings.verify_ssl
+        if settings.insight_install == "cloud":
+            self.base_url = f"https://{settings.vm_region}.api.insight.rapid7.com/vm/v1"
+            self._auth: tuple[str, str] | None = None
+            self._headers: dict[str, str] | None = {
+                "X-Api-Key": settings.vm_api_key,
+                "Content-Type": "application/json",
+            }
+            self._verify = True
+            if not InsightVMClient._CLOUD_WARNING_EMITTED:
+                warnings.warn(
+                    "InsightVM cloud mode is active. Routers still target the on-prem "
+                    "/api/3 endpoints; cloud calls will likely fail until each router "
+                    "is rewired to the Insight Platform /vm/v1 API. See "
+                    "https://help.rapid7.com/insightvm/en-us/api/integrations.html",
+                    stacklevel=2,
+                )
+                InsightVMClient._CLOUD_WARNING_EMITTED = True
+        else:
+            self.base_url = f"{settings.console_url}/api/3"
+            self._auth = (settings.username, settings.password)
+            self._headers = None
+            self._verify = settings.verify_ssl
 
     async def get(self, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         async with httpx.AsyncClient(verify=self._verify) as client:
-            r = await client.get(f"{self.base_url}{path}", auth=self._auth, params=params)
+            r = await client.get(
+                f"{self.base_url}{path}", params=params, **self._request_kwargs()
+            )
             r.raise_for_status()
             return r.json()
 
     async def post(self, path: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
         async with httpx.AsyncClient(verify=self._verify) as client:
-            r = await client.post(f"{self.base_url}{path}", auth=self._auth, json=body or {})
+            r = await client.post(
+                f"{self.base_url}{path}", json=body or {}, **self._request_kwargs()
+            )
             r.raise_for_status()
             return r.json()
 
     async def put(self, path: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
         async with httpx.AsyncClient(verify=self._verify) as client:
-            r = await client.put(f"{self.base_url}{path}", auth=self._auth, json=body or {})
+            r = await client.put(
+                f"{self.base_url}{path}", json=body or {}, **self._request_kwargs()
+            )
             r.raise_for_status()
             return r.json()
 
