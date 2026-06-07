@@ -42,7 +42,7 @@ def test_cloud_mode_uses_platform_url_and_api_key_header() -> None:
             vm_api_key="test-key-xyz",
         )
     )
-    assert client.base_url == "https://eu.api.insight.rapid7.com/vm/v1"
+    assert client.base_url == "https://eu.api.insight.rapid7.com/vm/v4/integration"
     assert client._auth is None
     assert client._headers is not None
     assert client._headers["X-Api-Key"] == "test-key-xyz"

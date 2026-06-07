@@ -166,13 +166,24 @@ class InsightVMClient:
 
     * ``local`` (default) — on-prem console. Basic Auth, ``/api/3`` paths.
       Docs: https://help.rapid7.com/insightvm/en-us/api/index.html
-    * ``cloud`` — Insight Platform managed. X-Api-Key, ``/vm/v1`` paths.
+    * ``cloud`` — Insight Platform managed. X-Api-Key, ``/vm/v4/integration``
+      paths (the "Cloud Integrations API"). The cloud API is JS-rendered
+      only and has no publicly downloadable OpenAPI spec; the
+      /vm/v4/integration segment is verified from community forum posts and
+      the BlinkOps integration docs.
       Docs: https://help.rapid7.com/insightvm/en-us/api/integrations.html
 
-    The local and cloud APIs use different endpoint paths and response shapes;
-    in cloud mode the existing routers will still call ``/api/3`` paths and
-    most calls will fail until each router is rewired. A warning is emitted
-    on first construction in cloud mode.
+    The local and cloud APIs use different endpoint paths AND different
+    response shapes. In cloud mode the existing routers still call
+    ``/api/3`` paths and most calls will fail until each router is rewired
+    against a live-fetched cloud spec. A warning is emitted on first
+    construction in cloud mode flagging this.
+
+    Status: cloud rewiring is BLOCKED on spec access — the help.rapid7.com
+    VM docs are not programmatically reachable. To finish the rewiring, an
+    operator must export the OpenAPI spec from an authenticated console
+    session (e.g. /api/3/html) or capture it via the JS-rendered
+    integrations.html page and feed it back here.
     """
 
     _CLOUD_WARNING_EMITTED = False
@@ -187,7 +198,9 @@ class InsightVMClient:
 
     def __init__(self, settings: Settings) -> None:
         if settings.insight_install == "cloud":
-            self.base_url = f"https://{settings.vm_region}.api.insight.rapid7.com/vm/v1"
+            self.base_url = (
+                f"https://{settings.vm_region}.api.insight.rapid7.com/vm/v4/integration"
+            )
             self._auth: tuple[str, str] | None = None
             self._headers: dict[str, str] | None = {
                 "X-Api-Key": settings.vm_api_key,
@@ -196,9 +209,11 @@ class InsightVMClient:
             self._verify = True
             if not InsightVMClient._CLOUD_WARNING_EMITTED:
                 warnings.warn(
-                    "InsightVM cloud mode is active. Routers still target the on-prem "
-                    "/api/3 endpoints; cloud calls will likely fail until each router "
-                    "is rewired to the Insight Platform /vm/v1 API. See "
+                    "InsightVM cloud mode is active (base path "
+                    "/vm/v4/integration). The existing routers still target the "
+                    "on-prem /api/3 endpoints and most response shapes don't match "
+                    "the Cloud Integrations API. Cloud calls will fail until each "
+                    "router is rewired against a live-fetched cloud spec. See "
                     "https://help.rapid7.com/insightvm/en-us/api/integrations.html",
                     stacklevel=2,
                 )

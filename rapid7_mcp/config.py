@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # InsightVM deployment topology
     # 'local'  -> on-prem console, Basic Auth, /api/3/* paths
-    # 'cloud'  -> Insight Platform (managed), X-Api-Key, /vm/v1/* paths
+    # 'cloud'  -> Insight Platform (managed), X-Api-Key, /vm/v4/integration/* paths
     #            (routers not yet rewired — see warning in InsightVMClient)
     insight_install: Literal["local", "cloud"] = Field(
         default="local", validation_alias="R7_INSIGHT_INSTALL"
