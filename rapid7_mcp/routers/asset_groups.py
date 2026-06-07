@@ -1,8 +1,9 @@
 """Asset Groups router — InsightVM logical asset groupings."""
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from rapid7_mcp.client import InsightVMClient, get_client
+from rapid7_mcp.config import Settings, get_settings
 from rapid7_mcp.models import AssetGroup, AssetGroupList
 
 router = APIRouter()
@@ -24,8 +25,15 @@ async def list_asset_groups(
     page: int = Query(0, ge=0),
     size: int = Query(10, ge=1, le=100),
     type: str | None = Query(None, description="Filter by group type: static or dynamic"),
+    settings: Settings = Depends(get_settings),
     client: InsightVMClient = Depends(get_client),
 ) -> AssetGroupList:
+    if settings.insight_install == "cloud":
+        raise HTTPException(
+            status_code=501,
+            detail="list_asset_groups is not available in the InsightVM cloud API; "
+            "the v4 Integrations API has no asset_groups equivalent.",
+        )
     params: dict = {"page": page, "size": size}
     if type:
         params["type"] = type
@@ -45,7 +53,13 @@ async def list_asset_groups(
 )
 async def get_asset_group(
     group_id: int,
+    settings: Settings = Depends(get_settings),
     client: InsightVMClient = Depends(get_client),
 ) -> AssetGroup:
+    if settings.insight_install == "cloud":
+        raise HTTPException(
+            status_code=501,
+            detail="get_asset_group is not available in the InsightVM cloud API.",
+        )
     data = await client.get(f"/asset_groups/{group_id}")
     return AssetGroup(**data)

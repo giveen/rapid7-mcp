@@ -311,6 +311,33 @@ class ReportGenerateResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# InsightVM Cloud Health (v4 Integrations API)
+# ---------------------------------------------------------------------------
+
+
+class VmHealthSummary(BaseModel):
+    """Subset of v4 HealthSummary (up/down/out_of_service/unknown counts)."""
+
+    up: int | None = None
+    down: int | None = None
+    out_of_service: int | None = Field(None, alias="outOfService")
+    unknown: int | None = None
+
+    model_config = {"populate_by_name": True, "extra": "allow"}
+
+
+class VmHealth(BaseModel):
+    """Health of the InsightVM cloud service (GET /admin/health)."""
+
+    status: str
+    duration: int | None = None
+    components: dict[str, Any] | None = None
+    summary: VmHealthSummary | None = None
+
+    model_config = {"populate_by_name": True, "extra": "allow"}
+
+
+# ---------------------------------------------------------------------------
 # InsightIDR — Investigations
 # ---------------------------------------------------------------------------
 

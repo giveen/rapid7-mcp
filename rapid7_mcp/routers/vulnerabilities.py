@@ -1,8 +1,9 @@
 """Vulnerabilities router — InsightVM vulnerability library."""
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from rapid7_mcp.client import InsightVMClient, get_client
+from rapid7_mcp.config import Settings, get_settings
 from rapid7_mcp.models import Vulnerability, VulnerabilityList
 
 router = APIRouter()
@@ -26,8 +27,15 @@ async def list_vulnerabilities(
         None,
         description="Filter by severity: Critical, Severe, Moderate, Low, Informational",
     ),
+    settings: Settings = Depends(get_settings),
     client: InsightVMClient = Depends(get_client),
 ) -> VulnerabilityList:
+    if settings.insight_install == "cloud":
+        raise HTTPException(
+            status_code=501,
+            detail="list_vulnerabilities is not available in the InsightVM cloud API; "
+            "use the cloud vulnerability search endpoint.",
+        )
     params: dict = {"page": page, "size": size}
     if severity:
         params["severity"] = severity
@@ -47,7 +55,13 @@ async def list_vulnerabilities(
 )
 async def get_vulnerability(
     vuln_id: str,
+    settings: Settings = Depends(get_settings),
     client: InsightVMClient = Depends(get_client),
 ) -> Vulnerability:
+    if settings.insight_install == "cloud":
+        raise HTTPException(
+            status_code=501,
+            detail="get_vulnerability is not available in the InsightVM cloud API.",
+        )
     data = await client.get(f"/vulnerabilities/{vuln_id}")
     return Vulnerability(**data)

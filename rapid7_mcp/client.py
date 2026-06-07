@@ -30,12 +30,27 @@ def _load_fixture(name: str) -> dict[str, Any]:
 
 
 def _resolve_vm_fixture(method: str, path: str) -> str | None:
-    """Map an InsightVM API path to a fixture filename."""
+    """Map an InsightVM API path to a fixture filename.
+
+    Resolves both local (/sites, /assets/{id}) and cloud
+    (/v4/integration/sites, /v4/integration/assets/{id}) paths.
+    """
     clean = path.split("?")[0].rstrip("/")
     parts = [p for p in clean.split("/") if p]
 
-    if method == "POST" and clean == "/assets/search":
+    if method == "POST" and clean in {"/assets/search", "/v4/integration/assets"}:
         return "assets.json"
+
+    if not parts:
+        return None
+
+    # Strip the cloud prefix if present
+    if len(parts) >= 3 and parts[0] == "v4" and parts[1] == "integration":
+        parts = parts[2:]
+
+    # /admin/health (cloud only)
+    if len(parts) == 2 and parts[0] == "admin" and parts[1] == "health":
+        return "vm_health.json"
 
     if not parts:
         return None
@@ -166,24 +181,19 @@ class InsightVMClient:
 
     * ``local`` (default) — on-prem console. Basic Auth, ``/api/3`` paths.
       Docs: https://help.rapid7.com/insightvm/en-us/api/index.html
-    * ``cloud`` — Insight Platform managed. X-Api-Key, ``/vm/v4/integration``
-      paths (the "Cloud Integrations API"). The cloud API is JS-rendered
-      only and has no publicly downloadable OpenAPI spec; the
-      /vm/v4/integration segment is verified from community forum posts and
-      the BlinkOps integration docs.
-      Docs: https://help.rapid7.com/insightvm/en-us/api/integrations.html
+    * ``cloud`` — Insight Platform managed. X-Api-Key, ``/vm`` base with
+      ``/v4/integration/...`` paths (the "Cloud Integrations API"). The
+      router paths include the ``/v4/integration/`` segment explicitly so
+      routers can branch per-endpoint. Cloud paths are documented in the
+      v4 OpenAPI spec at
+      https://help.rapid7.com/insightvm/en-us/api/insightvm-api-v4.json
+      and the user-facing reference at
+      https://help.rapid7.com/insightvm/en-us/api/integrations.html.
 
     The local and cloud APIs use different endpoint paths AND different
-    response shapes. In cloud mode the existing routers still call
-    ``/api/3`` paths and most calls will fail until each router is rewired
-    against a live-fetched cloud spec. A warning is emitted on first
-    construction in cloud mode flagging this.
-
-    Status: cloud rewiring is BLOCKED on spec access — the help.rapid7.com
-    VM docs are not programmatically reachable. To finish the rewiring, an
-    operator must export the OpenAPI spec from an authenticated console
-    session (e.g. /api/3/html) or capture it via the JS-rendered
-    integrations.html page and feed it back here.
+    response shapes. Routers branch internally on ``insight_install``;
+    endpoints without a cloud equivalent return ``501 Not Implemented``.
+    A warning is emitted on first construction in cloud mode.
     """
 
     _CLOUD_WARNING_EMITTED = False
@@ -198,9 +208,7 @@ class InsightVMClient:
 
     def __init__(self, settings: Settings) -> None:
         if settings.insight_install == "cloud":
-            self.base_url = (
-                f"https://{settings.vm_region}.api.insight.rapid7.com/vm/v4/integration"
-            )
+            self.base_url = f"https://{settings.vm_region}.api.insight.rapid7.com/vm"
             self._auth: tuple[str, str] | None = None
             self._headers: dict[str, str] | None = {
                 "X-Api-Key": settings.vm_api_key,
@@ -209,12 +217,11 @@ class InsightVMClient:
             self._verify = True
             if not InsightVMClient._CLOUD_WARNING_EMITTED:
                 warnings.warn(
-                    "InsightVM cloud mode is active (base path "
-                    "/vm/v4/integration). The existing routers still target the "
-                    "on-prem /api/3 endpoints and most response shapes don't match "
-                    "the Cloud Integrations API. Cloud calls will fail until each "
-                    "router is rewired against a live-fetched cloud spec. See "
-                    "https://help.rapid7.com/insightvm/en-us/api/integrations.html",
+                    "InsightVM cloud mode is active. Some endpoints are not "
+                    "available in the cloud API (asset_groups, remediation, "
+                    "reports) and return 501. Mapped endpoints call the "
+                    "v4 integrations API with different response shapes than "
+                    "the on-prem v3 API.",
                     stacklevel=2,
                 )
                 InsightVMClient._CLOUD_WARNING_EMITTED = True

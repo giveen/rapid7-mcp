@@ -42,7 +42,7 @@ def test_cloud_mode_uses_platform_url_and_api_key_header() -> None:
             vm_api_key="test-key-xyz",
         )
     )
-    assert client.base_url == "https://eu.api.insight.rapid7.com/vm/v4/integration"
+    assert client.base_url == "https://eu.api.insight.rapid7.com/vm"
     assert client._auth is None
     assert client._headers is not None
     assert client._headers["X-Api-Key"] == "test-key-xyz"
@@ -55,7 +55,7 @@ def test_cloud_mode_emits_warning_once() -> None:
         InsightVMClient(_settings(insight_install="cloud", vm_api_key="k"))
         # Second construction with the flag still set should NOT re-warn
         InsightVMClient(_settings(insight_install="cloud", vm_api_key="k"))
-    cloud_warnings = [w for w in caught if "/api/3" in str(w.message)]
+    cloud_warnings = [w for w in caught if "cloud mode is active" in str(w.message)]
     assert len(cloud_warnings) == 1
 
 
@@ -63,7 +63,7 @@ def test_local_mode_does_not_warn() -> None:
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         InsightVMClient(_settings(insight_install="local"))
-    cloud_warnings = [w for w in caught if "/api/3" in str(w.message)]
+    cloud_warnings = [w for w in caught if "cloud mode is active" in str(w.message)]
     assert cloud_warnings == []
 
 

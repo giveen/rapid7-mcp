@@ -1,0 +1,15 @@
+{
+  "status": "UP",
+  "duration": 42,
+  "components": {
+    "database": {"status": "UP"},
+    "scanEngines": {"status": "UP"},
+    "searchIndex": {"status": "UP"}
+  },
+  "summary": {
+    "up": 3,
+    "down": 0,
+    "outOfService": 0,
+    "unknown": 0
+  }
+}

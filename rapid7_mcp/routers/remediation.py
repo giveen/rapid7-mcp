@@ -1,8 +1,9 @@
 """Remediation router — InsightVM remediation projects."""
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from rapid7_mcp.client import InsightVMClient, get_client
+from rapid7_mcp.config import Settings, get_settings
 from rapid7_mcp.models import RemediationProject, RemediationProjectList
 
 router = APIRouter()
@@ -24,8 +25,15 @@ async def list_remediation_projects(
     page: int = Query(0, ge=0),
     size: int = Query(10, ge=1, le=100),
     status: str | None = Query(None, description="Filter by status: active, closed"),
+    settings: Settings = Depends(get_settings),
     client: InsightVMClient = Depends(get_client),
 ) -> RemediationProjectList:
+    if settings.insight_install == "cloud":
+        raise HTTPException(
+            status_code=501,
+            detail="list_remediation_projects is not available in the InsightVM cloud API; "
+            "remediation is an on-prem concept with no cloud equivalent.",
+        )
     params: dict = {"page": page, "size": size}
     if status:
         params["status"] = status
@@ -45,7 +53,13 @@ async def list_remediation_projects(
 )
 async def get_remediation_project(
     project_id: int,
+    settings: Settings = Depends(get_settings),
     client: InsightVMClient = Depends(get_client),
 ) -> RemediationProject:
+    if settings.insight_install == "cloud":
+        raise HTTPException(
+            status_code=501,
+            detail="get_remediation_project is not available in the InsightVM cloud API.",
+        )
     data = await client.get(f"/remediation_projects/{project_id}")
     return RemediationProject(**data)

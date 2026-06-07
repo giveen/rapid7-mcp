@@ -12,6 +12,7 @@ from rapid7_mcp.routers import (
     reports,
     scans,
     sites,
+    vm_health,
     vulnerabilities,
 )
 
@@ -40,6 +41,7 @@ app.include_router(
     remediation.router, prefix="/remediation_projects", tags=["InsightVM · Remediation"]
 )
 app.include_router(reports.router, prefix="/reports", tags=["InsightVM · Reports"])
+app.include_router(vm_health.router, prefix="/vm", tags=["InsightVM · Health (cloud)"])
 
 # InsightIDR — cloud SIEM
 app.include_router(idr.router, prefix="/idr", tags=["InsightIDR"])
