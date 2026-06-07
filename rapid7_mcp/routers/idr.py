@@ -80,14 +80,30 @@ async def query_logs(
     body: LogSearchRequest,
     client: InsightIDRClient = Depends(get_idr_client),
 ) -> LogSearchResults:
-    payload: dict = {"leql": {"statement": body.query}}
-    if body.from_time:
-        payload["from"] = body.from_time
-    if body.to_time:
-        payload["to"] = body.to_time
+    during: dict = {}
+    if body.time_range:
+        during["time_range"] = body.time_range
+    else:
+        if body.from_time is not None:
+            during["from"] = body.from_time
+        if body.to_time is not None:
+            during["to"] = body.to_time
+    payload: dict = {"leql": {"statement": body.query, "during": during}}
     if body.logs:
         payload["logs"] = body.logs
-    data = await client.post("/log_search/query/logs", body=payload)
+    data = await client.post("/query/logs", body=payload)
+
+    for _ in range(10):
+        if data.get("progress") is None:
+            return LogSearchResults(**data)
+        self_link = next(
+            (link["href"] for link in data.get("links", []) if link.get("rel") == "Self"),
+            None,
+        )
+        if not self_link:
+            return LogSearchResults(**data)
+        path = self_link.split(".rapid7.com", 1)[-1]
+        data = await client.get(path)
     return LogSearchResults(**data)
 
 

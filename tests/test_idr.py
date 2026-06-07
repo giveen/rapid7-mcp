@@ -25,7 +25,8 @@ def test_get_investigation(client: TestClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["priority"] == "CRITICAL"
-    assert len(data["alerts"]) == 2
+    assert data["status"] == "INVESTIGATING"
+    assert data["assignee"] == "bob@example.com"
 
 
 def test_query_logs(client: TestClient) -> None:

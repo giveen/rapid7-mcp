@@ -315,29 +315,21 @@ class ReportGenerateResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-class InvestigationAlert(BaseModel):
-    id: str | None = None
-    alert_type: str | None = None
-    alert_type_description: str | None = None
-    first_event_time: str | None = None
-    risk_score: int | None = None
-
-    model_config = {"populate_by_name": True}
-
-
 class Investigation(BaseModel):
-    id: str
+    rrn: str
+    organization_id: str = Field(alias="organizationId")
     title: str
+    source: str
     status: str
     priority: str
-    assignee: dict | None = None
-    source: str | None = None
-    disposition: str | None = None
-    alerts: list[InvestigationAlert] = []
-    created_time: str | None = None
-    last_accessed: str | None = None
+    last_accessed: str = Field(alias="lastAccessed")
+    created_time: str = Field(alias="createdTime")
+    disposition: str
+    assignee: str | None = None
+    first_alert_time: str | None = Field(None, alias="firstAlertTime")
+    latest_alert_time: str | None = Field(None, alias="latestAlertTime")
+    tags: list[str] = []
     responsibility: str | None = None
-    rrn: str | None = None
 
     model_config = {"populate_by_name": True}
 
@@ -356,23 +348,30 @@ class LogSearchRequest(BaseModel):
     query: str
     from_time: int | None = None
     to_time: int | None = None
+    time_range: str | None = None
     logs: list[str] = []
 
 
 class LogEntry(BaseModel):
     message: str
-    timestamp: int | None = None
-    log_id: str | None = None
-    sequence_number: int | None = None
+    timestamp: int
+    log_id: str = Field(alias="logId")
+    sequence_number: int = Field(alias="sequenceNumber")
+    sequence_number_str: str = Field(alias="sequenceNumberStr")
+    labels: list[dict] | None = None
+    links: list[Link] = []
+    kvp_info: dict | None = Field(None, alias="kvpInfo")
 
     model_config = {"populate_by_name": True}
 
 
 class LogSearchResults(BaseModel):
-    id: str | None = None
-    leql: dict | None = None
     logs: list[str] = []
+    leql: dict = {}
     events: list[LogEntry] = []
+    id: str | None = None
+    progress: int | None = None
+    links: list[Link] = []
 
 
 # ---------------------------------------------------------------------------

@@ -83,7 +83,7 @@ def _resolve_vm_fixture(method: str, path: str) -> str | None:
 def _resolve_idr_fixture(method: str, path: str) -> str | None:
     """Map an InsightIDR API path to a fixture filename.
 
-    Paths are full API paths, e.g. /idr/v2/investigations or /log_search/query/logs.
+    Paths are full API paths, e.g. /idr/v2/investigations or /query/logs.
     """
     clean = path.split("?")[0].rstrip("/")
     parts = [p for p in clean.split("/") if p]
@@ -100,8 +100,8 @@ def _resolve_idr_fixture(method: str, path: str) -> str | None:
     if "iocs" in parts:
         return "indicators.json"
 
-    # POST /log_search/query/logs
-    if method == "POST" and "logs" in parts:
+    # POST /query/logs
+    if method == "POST" and len(parts) == 2 and parts[0] == "query" and parts[1] == "logs":
         return "log_search_results.json"
 
     return None
