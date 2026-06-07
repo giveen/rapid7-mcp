@@ -142,19 +142,7 @@ async def query_logs(
     payload: dict = {"leql": {"statement": body.query, "during": during}}
     if body.logs:
         payload["logs"] = body.logs
-    data = await client.post("/query/logs", body=payload)
-
-    for _ in range(10):
-        if data.get("progress") is None:
-            return LogSearchResults(**data)
-        self_link = next(
-            (link["href"] for link in data.get("links", []) if link.get("rel") == "Self"),
-            None,
-        )
-        if not self_link:
-            return LogSearchResults(**data)
-        path = self_link.split(".rapid7.com", 1)[-1]
-        data = await client.get(path)
+    data = await client.query_logs(payload)
     return LogSearchResults(**data)
 
 

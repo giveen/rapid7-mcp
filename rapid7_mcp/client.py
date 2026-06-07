@@ -29,65 +29,64 @@ def _load_fixture(name: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def _resolve_vm_fixture(method: str, path: str) -> str | None:
-    """Map an InsightVM API path to a fixture filename.
+_FIXTURE_RULES: list[tuple[tuple[str, ...], str]] = [
+    # Sites
+    (("sites",),                             "sites.json"),
+    (("sites", "<id>"),                      "site.json"),
+    # Asset groups
+    (("asset_groups",),                      "asset_groups.json"),
+    (("asset_groups", "<id>"),               "asset_group.json"),
+    # Assets (sub-routes before plain single for correct priority)
+    (("assets", "<id>", "vulnerabilities"),  "asset_vulnerabilities.json"),
+    (("assets", "<id>", "tags"),             "asset_tags.json"),
+    (("assets", "<id>"),                     "asset.json"),
+    # Vulnerabilities
+    (("vulnerabilities",),                   "vulnerabilities.json"),
+    (("vulnerabilities", "<id>"),            "vulnerability.json"),
+    # Scans
+    (("scans",),                              "scans.json"),
+    (("scans", "<id>"),                       "scan.json"),
+    # Remediation projects
+    (("remediation_projects",),              "remediation_projects.json"),
+    (("remediation_projects", "<id>"),       "remediation_project.json"),
+    # Reports (sub-routes before plain single)
+    (("reports",),                           "reports.json"),
+    (("reports", "<id>", "generate"),        "report_generate.json"),
+    (("reports", "<id>"),                    "report.json"),
+    # Cloud health
+    (("admin", "health"),                    "vm_health.json"),
+]
 
-    Resolves both local (/sites, /assets/{id}) and cloud
-    (/v4/integration/sites, /v4/integration/assets/{id}) paths.
-    """
+
+def _fixture_match(actual: tuple[str, ...], pattern: tuple[str, ...]) -> bool:
+    """True if *actual* matches *pattern*, where ``"<id>"`` matches any single segment."""
+    return len(actual) == len(pattern) and all(
+        a == p or p == "<id>" for a, p in zip(actual, pattern, strict=True)
+    )
+
+
+def _resolve_vm_fixture(method: str, path: str) -> str | None:
     clean = path.split("?")[0].rstrip("/")
     parts = [p for p in clean.split("/") if p]
 
-    if method == "POST" and clean in {"/assets/search", "/v4/integration/assets"}:
+    # POST /assets/search and POST /v4/integration/assets both list assets
+    if method == "POST" and len(parts) >= 2 and tuple(parts[-2:]) in (
+        ("assets", "search"),
+        ("integration", "assets"),
+    ):
         return "assets.json"
 
-    if not parts:
-        return None
-
-    # Strip the cloud prefix if present
+    # Strip the cloud prefix /v4/integration/...
     if len(parts) >= 3 and parts[0] == "v4" and parts[1] == "integration":
         parts = parts[2:]
 
-    # /admin/health (cloud only)
-    if len(parts) == 2 and parts[0] == "admin" and parts[1] == "health":
-        return "vm_health.json"
-
     if not parts:
         return None
 
-    root = parts[0]
-
-    if root == "sites":
-        return "sites.json" if len(parts) == 1 else "site.json"
-
-    if root == "asset_groups":
-        return "asset_groups.json" if len(parts) == 1 else "asset_group.json"
-
-    if root == "assets" and len(parts) == 3 and parts[2] == "vulnerabilities":
-        return "asset_vulnerabilities.json"
-
-    if root == "assets" and len(parts) == 3 and parts[2] == "tags":
-        return "asset_tags.json"
-
-    if root == "assets" and len(parts) == 2:
-        return "asset.json"
-
-    if root == "vulnerabilities":
-        return "vulnerabilities.json" if len(parts) == 1 else "vulnerability.json"
-
-    if root == "scans":
-        return "scans.json" if len(parts) == 1 else "scan.json"
-
-    if root == "remediation_projects":
-        return "remediation_projects.json" if len(parts) == 1 else "remediation_project.json"
-
-    if root == "reports":
-        if len(parts) == 1:
-            return "reports.json"
-        if len(parts) == 3 and parts[2] == "generate":
-            return "report_generate.json"
-        return "report.json"
-
+    key = tuple(parts)
+    for pattern, fixture in _FIXTURE_RULES:
+        if _fixture_match(key, pattern):
+            return fixture
     return None
 
 
@@ -287,6 +286,8 @@ class InsightIDRClient:
     Region must be one of: us, us2, us3, eu, ca, au, ap.
     """
 
+    _MAX_LOG_POLLS = 10
+
     def __init__(self, settings: Settings) -> None:
         self.base_url = f"https://{settings.idr_region}.api.insight.rapid7.com"
         self._headers = {
@@ -305,6 +306,22 @@ class InsightIDRClient:
             r = await client.post(f"{self.base_url}{path}", headers=self._headers, json=body or {})
             r.raise_for_status()
             return r.json()
+
+    async def query_logs(self, payload: dict[str, Any]) -> dict[str, Any]:
+        data = await self.post("/query/logs", body=payload)
+
+        for _ in range(self._MAX_LOG_POLLS):
+            if data.get("progress") is None:
+                return data
+            self_link = next(
+                (link["href"] for link in data.get("links", []) if link.get("rel") == "Self"),
+                None,
+            )
+            if not self_link:
+                return data
+            path = self_link.split(".rapid7.com", 1)[-1]
+            data = await self.get(path)
+        return data
 
 
 class DemoInsightIDRClient(InsightIDRClient):

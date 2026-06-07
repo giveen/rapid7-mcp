@@ -3,7 +3,14 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from rapid7_mcp.client import get_client, get_idr_client, get_msp_client
+from rapid7_mcp.client import (
+    DemoInsightIDRClient,
+    DemoInsightVMClient,
+    DemoMetasploitClient,
+    get_client,
+    get_idr_client,
+    get_msp_client,
+)
 from rapid7_mcp.config import Settings, get_settings
 from rapid7_mcp.main import app
 
@@ -25,11 +32,6 @@ def client() -> TestClient:
     """TestClient with all dependencies overridden to demo mode (local install)."""
     settings = demo_settings()
     app.dependency_overrides[get_settings] = lambda: settings
-    from rapid7_mcp.client import (
-        DemoInsightIDRClient,
-        DemoInsightVMClient,
-        DemoMetasploitClient,
-    )
     app.dependency_overrides[get_client] = lambda: DemoInsightVMClient(settings)
     app.dependency_overrides[get_idr_client] = lambda: DemoInsightIDRClient(settings)
     app.dependency_overrides[get_msp_client] = lambda: DemoMetasploitClient(settings)
@@ -47,11 +49,6 @@ def cloud_client() -> TestClient:
         vm_api_key="test-key",
     )
     app.dependency_overrides[get_settings] = lambda: settings
-    from rapid7_mcp.client import (
-        DemoInsightIDRClient,
-        DemoInsightVMClient,
-        DemoMetasploitClient,
-    )
     app.dependency_overrides[get_client] = lambda: DemoInsightVMClient(settings)
     app.dependency_overrides[get_idr_client] = lambda: DemoInsightIDRClient(settings)
     app.dependency_overrides[get_msp_client] = lambda: DemoMetasploitClient(settings)
