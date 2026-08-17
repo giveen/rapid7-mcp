@@ -2,8 +2,8 @@
 
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![CI](https://github.com/SecuritahGuy/rapid7-mcp/actions/workflows/ci.yml/badge.svg)
-![Wiki Publish](https://github.com/SecuritahGuy/rapid7-mcp/actions/workflows/wiki-publish.yml/badge.svg)
+![CI](https://github.com/jmorales-savers/rapid7-mcp/actions/workflows/ci.yml/badge.svg)
+![Wiki Publish](https://github.com/jmorales-savers/rapid7-mcp/actions/workflows/wiki-publish.yml/badge.svg)
 
 A unified MCP server for Rapid7's security platform — exposing [InsightVM](https://www.rapid7.com/products/insightvm/) (vulnerability management), [InsightIDR](https://www.rapid7.com/products/insightidr/) (SIEM/investigations), [Automation (InsightConnect)](https://docs.rapid7.com/insightconnect/) (workflow automation), and [Metasploit Pro](https://www.rapid7.com/products/metasploit/) (pentest telemetry) as tools for Claude, Cursor, and any MCP-compatible LLM client.
 
@@ -11,7 +11,7 @@ Ask natural-language questions across your entire Rapid7 environment — vulnera
 
 Built with [fastapi-mcp](https://github.com/tadata-ru/fastapi-mcp), [FastAPI](https://fastapi.tiangolo.com/), and [httpx](https://www.python-httpx.org/).
 
-> **No Rapid7 instance?** Set `DEMO_MODE=true` to explore all 26 tools against realistic fixture data. Clone, run, connect — no credentials required.
+> **No Rapid7 instance?** Set `DEMO_MODE=true` to explore all 55 tools against realistic fixture data. Clone, run, connect — no credentials required.
 
 ---
 
@@ -37,26 +37,26 @@ The server translates these into API calls across InsightVM, InsightIDR, and Met
 Claude / Cursor / MCP Client
         │  MCP (Streamable HTTP)
         ▼
-┌───────────────────────────────────────────┐
-│  FastAPI + fastapi-mcp  :8000             │
-│                                           │
-│  InsightVM        InsightIDR    MSP       │
-│  ──────────────   ──────────    ───────── │
-│  /sites           /idr/invest.  /workspcs │
-│  /assets          /idr/logs     /sessions │
-│  /asset_groups    /idr/iocs     /loot     │
-│  /vulnerabilities                /tasks   │
-│  /scans                                   │
-│  /remediation_projects                    │
-│  /reports                                 │
-│                                           │
-│  /mcp  ← MCP endpoint                    │
-└──────┬──────────────┬──────────┬──────────┘
-       │ Basic Auth   │ X-Api-Key│ Token
-       ▼              ▼          ▼
-  InsightVM      InsightIDR   Metasploit
-  Console        Cloud API    Pro Console
-  :3780          (regional)   :3790
+┌─────────────────────────────────────────────────┐
+│  FastAPI + fastapi-mcp  :8000                   │
+│                                                 │
+│  InsightVM      InsightIDR       InsightConnect │
+│  ──────────────  ───────────────  ──────────── │
+│  /sites          /idr/invest.     /connect/jobs │
+│  /assets         /idr/logs        /connect/wfs  │
+│  /asset_groups   /idr/rules                     │
+│  /vulnerabilities /idr/entities  MSP            │
+│  /scans          /idr/iocs        ───────────── │
+│  /remediation                     /workspaces   │
+│  /reports                         /sessions     │
+│                                   /loot         │
+│  /mcp  ← MCP endpoint                           │
+└──────┬──────────────┬─────────────┬─────────────┘
+       │ Basic Auth   │ X-Api-Key   │ Token
+       ▼              ▼             ▼
+  InsightVM      Insight Platform  Metasploit
+  Console        (IDR + Connect)   Pro Console
+  :3780          (regional)        :3790
 ```
 
 Every FastAPI route is automatically published as an MCP tool via `fastapi-mcp`. Operation IDs become tool names, Pydantic schemas become input/output schemas, and docstrings become tool descriptions.
@@ -69,7 +69,7 @@ Every FastAPI route is automatically published as an MCP tool via `fastapi-mcp`.
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/SecuritahGuy/rapid7-mcp.git
+git clone https://github.com/jmorales-savers/rapid7-mcp.git
 cd rapid7-mcp
 uv sync
 
@@ -139,6 +139,12 @@ Start the server first, then restart Claude Desktop.
 | `get_vulnerability` | Full vuln details — CVSS v2/v3, CVEs, exploit count, description |
 | `list_scans` | Recent scans with status, duration, and vulnerability summaries |
 | `get_scan` | Details for a single scan |
+| `start_scan` | Trigger a new scan on a site by site ID |
+| `stop_scan` | Stop a running scan |
+| `list_scan_engines` | List scan engines — name, address, status, pool membership |
+| `get_scan_engine` | Full details for a single scan engine |
+| `update_scan_engine_configuration` | Update a scan engine's address or attributes |
+| `remove_scan_engine_configuration` | Remove a scan engine from the console |
 | `list_remediation_projects` | In-flight fix tracking — owner, due date, affected assets |
 | `get_remediation_project` | Details for a single remediation project |
 | `list_reports` | All configured reports (executive summaries, PCI exports, CSV) |
@@ -151,8 +157,37 @@ Start the server first, then restart Claude Desktop.
 | --- | --- |
 | `list_investigations` | Open security incidents — priority, status, assignee, alert summary |
 | `get_investigation` | Full alert timeline for a specific investigation |
+| `list_investigation_alerts` | All alerts attached to an investigation |
+| `search_investigations` | Filter investigations by status, priority, assignee, or date range |
+| `assign_investigation` | Assign an investigation to an analyst |
+| `set_investigation_disposition` | Set disposition: Benign/Malicious/Not Applicable/Undecided |
+| `set_investigation_status` | Set status: Open/Investigating/Waiting/Closed |
+| `set_investigation_priority` | Set priority: Critical/High/Medium/Low |
+| `bulk_close_investigations` | Close multiple investigations at once with a disposition |
+| `add_investigation_comment` | Add a triage note or analyst comment to an investigation |
+| `list_investigation_comments` | List all analyst comments on an investigation |
 | `query_logs` | LEQL search across firewall, proxy, DNS, and endpoint logs |
+| `list_logs` | List all available log sources and their log sets |
 | `list_indicators` | Active threat intelligence IOCs — IPs, domains, hashes, URLs |
+| `get_health_metrics` | IDR platform health metrics (collector status, ingestion counts) |
+
+### InsightIDR — Detection Rules
+
+| Tool | Description |
+| --- | --- |
+| `list_detection_rules` | List detection rules with name, MITRE tactics, priority, state, and detection count |
+| `get_detection_rule` | Full detail for a single rule — conditions, event types, exceptions, MITRE mapping |
+
+### InsightIDR — Entity Context
+
+| Tool | Description |
+| --- | --- |
+| `search_idr_accounts` | Search domain-joined accounts (AD, Okta) by username, domain, or UPN |
+| `get_idr_account` | Account detail — type, privileged status, lock state, last auth time |
+| `search_idr_users` | Search IDR users by name, email, or risk priority |
+| `get_idr_user` | User detail — risk score (0–1000), risk priority, last-seen timestamp |
+| `search_idr_assets` | Search assets tracked in IDR by hostname or IP |
+| `get_idr_asset` | Asset detail by RRN |
 
 ### Automation (InsightConnect)
 
@@ -192,11 +227,22 @@ Fixtures in [`tests/fixtures/`](tests/fixtures/):
 | `vulnerabilities.json` / `vulnerability.json` | Log4Shell, OpenSSL CVE-2022-0778, POODLE |
 | `asset_vulnerabilities.json` | Vulnerabilities scoped to a single asset |
 | `scans.json` / `scan.json` | One finished scan, one running |
+| `scan_engines.json` / `scan_engine.json` | Scan engine list and single engine detail |
+| `scan_start.json` / `scan_stop.json` | Start/stop scan response envelopes |
+| `scan_engine_update_config.json` / `scan_engine_remove_config.json` | Engine update/remove responses |
 | `remediation_projects.json` / `remediation_project.json` | Q1 patching sprint, Log4Shell project |
 | `reports.json` / `report.json` / `report_generate.json` | Executive summary, PCI report, CSV export |
 | `investigations.json` / `investigation.json` | PowerShell execution alert, SSH brute force |
+| `bulk_close.json` | Bulk-close investigation response |
+| `comment.json` / `comments.json` | Single comment and comment list for an investigation |
+| `detection_rules.json` / `detection_rule.json` | Detection rules list and single rule with MITRE mapping |
+| `idr_accounts.json` / `idr_account.json` | Domain account search results and single account detail |
+| `idr_users.json` / `idr_user.json` | IDR user search results and single user with risk score |
+| `idr_assets.json` / `idr_asset.json` | IDR asset search results and single asset detail |
 | `log_search_results.json` | Firewall and proxy hits for a Tor exit node IP |
 | `indicators.json` | Tor IP, Cobalt Strike hash, APT28 C2 domain |
+| `connect_jobs.json` / `connect_job.json` | InsightConnect job history and single job with step I/O |
+| `connect_workflows.json` / `connect_workflow.json` | Workflow list and single workflow with version metadata |
 | `workspaces.json` / `workspace.json` | Default workspace + Q1 external pentest |
 | `sessions.json` | Meterpreter (SYSTEM) + shell (tomcat) sessions |
 | `loot.json` | NTLM hashes + PostgreSQL credentials |
