@@ -1,0 +1,22 @@
+{
+  "rule_set": "SENTINEL",
+  "rrn": "rrn:cba:::detection-rule:SENTINEL-TRAVEL",
+  "state": {"value": "ACTIVE", "reason": null},
+  "rule": {
+    "name": "Microsoft Sentinel - Correlate Unfamiliar sign-in properties & atypical travel alerts",
+    "description": "Correlates Entra ID risk events for unfamiliar sign-in properties combined with atypical travel.",
+    "recommendation": "Verify if travel and sign-in are expected for the user.",
+    "rule_action": "CREATES_ALERTS",
+    "priority_level": "HIGH",
+    "tactics": ["TA0001"],
+    "techniques": ["T1078"]
+  },
+  "threats": [],
+  "event_types": ["authentication"],
+  "detection_count": 8,
+  "create_date": "2023-06-01T00:00:00.000Z",
+  "last_modified_date": "2024-01-01T00:00:00.000Z",
+  "last_detected_date": "2026-08-13T18:08:00.000Z",
+  "responsibility": "MDR",
+  "exception_count": 0
+}

@@ -1,0 +1,24 @@
+{
+  "data": {
+    "workflowId": "wf-001",
+    "state": "active",
+    "publishedVersion": {
+      "name": "Enrich Alert Data with Open Source Plugins",
+      "summary": "",
+      "tags": [
+        "Threat Intelligence"
+      ],
+      "createdAt": "2026-02-05T16:50:03Z",
+      "createdByName": "SOC Admin",
+      "createdById": "user-1",
+      "updatedAt": "2026-05-15T14:19:02Z",
+      "updatedByName": "SOC Admin",
+      "updatedById": "user-1",
+      "activatedAt": "2026-02-05T16:50:04Z",
+      "activatedByName": "SOC Admin",
+      "activatedById": "user-1"
+    },
+    "unpublishedVersion": null,
+    "rrn": "rrn:icon:us:org:workflow:wf-001"
+  }
+}

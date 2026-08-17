@@ -1,0 +1,29 @@
+{
+  "data": {
+    "job": {
+      "id": "job-001",
+      "status": "succeeded",
+      "userAssignedStatus": null,
+      "name": "Quarantine Asset with Microsoft Defender",
+      "workflowVersionId": "wfver-001",
+      "startedAt": "2026-07-17T14:57:07.206374Z",
+      "updatedAt": "2026-07-17T15:27:24.199290Z",
+      "endedAt": "2026-07-17T15:27:24.199290Z",
+      "ownedById": null,
+      "imageData": "https://cdn-assets.connect.insight.rapid7.com/step-type-icons/default.svg",
+      "owner": "",
+      "stepErrorCount": 2,
+      "duration": 1817,
+      "tags": [
+        "Asset Management",
+        "Endpoint Detection & Response"
+      ],
+      "inputs": {
+        "assetName": "wkstn-44"
+      },
+      "outputs": {
+        "result": "quarantine_applied"
+      }
+    }
+  }
+}

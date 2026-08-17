@@ -17,6 +17,48 @@ from rapid7_mcp.models import (
 router = APIRouter()
 
 
+def _escape_cloud_literal(value: str) -> str:
+    return value.replace("'", "\\'")
+
+
+def _to_cloud_query(criteria: AssetSearchRequest) -> str:
+    if criteria.cloud_query:
+        return criteria.cloud_query
+
+    if not criteria.filters:
+        return ""
+
+    field_map = {
+        "host-name": "asset.host_name",
+        "os-family": "asset.os_family",
+        # The cloud query catalog does not support asset.ip/site-id/tag directly.
+    }
+    op_map = {"is": "=", "is-not": "!="}
+
+    expressions: list[str] = []
+    unsupported: list[str] = []
+    for item in criteria.filters:
+        mapped_field = field_map.get(item.field)
+        mapped_op = op_map.get(item.operator)
+        if mapped_field is None or mapped_op is None:
+            unsupported.append(f"{item.field}:{item.operator}")
+            continue
+        expressions.append(f"{mapped_field} {mapped_op} '{_escape_cloud_literal(item.value)}'")
+
+    if not expressions:
+        details = ", ".join(sorted(set(unsupported)))
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Cloud asset search does not support the provided legacy filters. "
+                f"Unsupported filters: {details}. Use cloud_query with a v4 expression."
+            ),
+        )
+
+    joiner = " && " if criteria.match.lower() == "all" else " || "
+    return joiner.join(expressions)
+
+
 @router.get(
     "/{asset_id}",
     operation_id="get_asset",
@@ -28,7 +70,7 @@ router = APIRouter()
     ),
 )
 async def get_asset(
-    asset_id: int,
+    asset_id: str,
     settings: Settings = Depends(get_settings),
     client: InsightVMClient = Depends(get_client),
 ) -> Any:
@@ -58,9 +100,9 @@ async def search_assets(
     client: InsightVMClient = Depends(get_client),
 ) -> Any:
     if settings.insight_install == "cloud":
-        return await client.post(
-            "/v4/integration/assets", body={"asset": body.model_dump_json()}
-        )
+        cloud_query = _to_cloud_query(body)
+        cloud_body = {"asset": cloud_query} if cloud_query else {}
+        return await client.post("/v4/integration/assets", body=cloud_body)
     data = await client.post(
         f"/assets/search?page={page}&size={size}",
         body=body.model_dump(),

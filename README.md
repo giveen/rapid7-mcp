@@ -5,7 +5,7 @@
 ![CI](https://github.com/SecuritahGuy/rapid7-mcp/actions/workflows/ci.yml/badge.svg)
 ![Wiki Publish](https://github.com/SecuritahGuy/rapid7-mcp/actions/workflows/wiki-publish.yml/badge.svg)
 
-A unified MCP server for Rapid7's security platform — exposing [InsightVM](https://www.rapid7.com/products/insightvm/) (vulnerability management), [InsightIDR](https://www.rapid7.com/products/insightidr/) (SIEM/investigations), and [Metasploit Pro](https://www.rapid7.com/products/metasploit/) (pentest telemetry) as tools for Claude, Cursor, and any MCP-compatible LLM client.
+A unified MCP server for Rapid7's security platform — exposing [InsightVM](https://www.rapid7.com/products/insightvm/) (vulnerability management), [InsightIDR](https://www.rapid7.com/products/insightidr/) (SIEM/investigations), [Automation (InsightConnect)](https://docs.rapid7.com/insightconnect/) (workflow automation), and [Metasploit Pro](https://www.rapid7.com/products/metasploit/) (pentest telemetry) as tools for Claude, Cursor, and any MCP-compatible LLM client.
 
 Ask natural-language questions across your entire Rapid7 environment — vulnerabilities, active incidents, compromised hosts — and get structured answers without writing a single API call.
 
@@ -154,6 +154,15 @@ Start the server first, then restart Claude Desktop.
 | `query_logs` | LEQL search across firewall, proxy, DNS, and endpoint logs |
 | `list_indicators` | Active threat intelligence IOCs — IPs, domains, hashes, URLs |
 
+### Automation (InsightConnect)
+
+| Tool | Description |
+| --- | --- |
+| `list_connect_jobs` | List Automation jobs (workflow execution history) |
+| `get_connect_job` | Get a single Automation job with step inputs/outputs |
+| `list_connect_workflows` | List Automation workflows and active/inactive state |
+| `get_connect_workflow` | Get one Automation workflow and version metadata |
+
 ### Metasploit Pro — Pentest Telemetry (read-only)
 
 > These tools are intentionally read-only. The LLM can see what Metasploit knows — active sessions, collected credentials, task status — but cannot execute exploits or interact with sessions.
@@ -214,6 +223,13 @@ All settings via environment variable or `.env` file. Copy `.env.example` to get
 | --- | --- | --- |
 | `IDR_REGION` | `us` | Insight Platform region: `us`, `us2`, `us3`, `eu`, `ca`, `au`, `ap` |
 | `IDR_API_KEY` | _(empty)_ | Insight Platform API key |
+
+### Automation (InsightConnect)
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `CONNECT_REGION` | _(falls back to `IDR_REGION`)_ | Automation API region |
+| `CONNECT_API_KEY` | _(falls back to `IDR_API_KEY`)_ | Automation API key |
 
 ### Metasploit Pro
 

@@ -69,6 +69,7 @@ class AssetList(BaseModel):
 class AssetSearchRequest(BaseModel):
     filters: list[SearchCriterion] = []
     match: str = "all"
+    cloud_query: str | None = None
 
 
 class CvssScore(BaseModel):
@@ -154,6 +155,26 @@ class ScanList(BaseModel):
     page: PageInfo
     resources: list[Scan]
     links: list[Link] = []
+
+
+class ScanStartRequest(BaseModel):
+    asset_ids: list[str] | None = None
+    credential_sources: list[str] | None = None
+    engine_ids: list[str] | None = None
+    exclusions: list[str] | None = None
+    name: str | None = None
+    result_consumer: str | None = None
+    solution_ids: list[str] | None = None
+    start_time: str | None = None
+    vulnerability_ids: list[str] | None = None
+
+
+class ScanEngineConfigurationUpdateRequest(BaseModel):
+    properties: list[str]
+
+
+class ScanEngineConfigurationRemoveRequest(BaseModel):
+    properties: list[str]
 
 
 class AssetGroup(BaseModel):
@@ -252,7 +273,7 @@ class VmHealthSummary(BaseModel):
 
 class VmHealth(BaseModel):
     status: str
-    duration: int | None = None
+    duration: float | None = None
     components: dict[str, Any] | None = None
     summary: VmHealthSummary | None = None
 

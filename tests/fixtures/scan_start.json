@@ -1,0 +1,9 @@
+{
+  "scans": [
+    {
+      "id": "new-scan-123",
+      "status": "Dispatching"
+    }
+  ],
+  "unscanned_assets": []
+}

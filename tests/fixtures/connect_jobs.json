@@ -1,0 +1,57 @@
+{
+  "data": {
+    "jobs": [
+      {
+        "id": "job-001",
+        "status": "succeeded",
+        "userAssignedStatus": null,
+        "name": "Quarantine Asset with Microsoft Defender",
+        "workflowVersionId": "wfver-001",
+        "startedAt": "2026-07-17T14:57:07.206374Z",
+        "updatedAt": "2026-07-17T15:27:24.199290Z",
+        "endedAt": "2026-07-17T15:27:24.199290Z",
+        "ownedById": null,
+        "imageData": "https://cdn-assets.connect.insight.rapid7.com/step-type-icons/default.svg",
+        "owner": "",
+        "stepErrorCount": 2,
+        "duration": 1817,
+        "tags": [
+          "Asset Management",
+          "Endpoint Detection & Response"
+        ],
+        "inputs": null,
+        "outputs": null
+      },
+      {
+        "id": "job-002",
+        "status": "failed",
+        "userAssignedStatus": "needs_review",
+        "name": "Contain Host via Insight Agent",
+        "workflowVersionId": "wfver-002",
+        "startedAt": "2026-07-18T09:14:01.005100Z",
+        "updatedAt": "2026-07-18T09:14:12.110120Z",
+        "endedAt": "2026-07-18T09:14:12.110120Z",
+        "ownedById": "user-1",
+        "imageData": "https://cdn-assets.connect.insight.rapid7.com/step-type-icons/default.svg",
+        "owner": "analyst@example.com",
+        "stepErrorCount": 1,
+        "duration": 11,
+        "tags": [
+          "Endpoint",
+          "Containment"
+        ],
+        "inputs": {
+          "hostname": "wkstn-44"
+        },
+        "outputs": {
+          "result": "failed"
+        }
+      }
+    ],
+    "meta": {
+      "total": 2,
+      "offset": 0,
+      "limit": 30
+    }
+  }
+}

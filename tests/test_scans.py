@@ -26,3 +26,15 @@ def test_get_scan(client: TestClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert "status" in data
+
+
+def test_cloud_only_scan_engine_routes_return_501_in_local_mode(client: TestClient) -> None:
+    response = client.get("/scans/engine")
+    assert response.status_code == 501
+
+
+def test_cloud_only_scan_start_stop_routes_return_501_in_local_mode(client: TestClient) -> None:
+    start = client.post("/scans", json={"name": "test-scan"})
+    assert start.status_code == 501
+    stop = client.post("/scans/scan-123/stop")
+    assert stop.status_code == 501

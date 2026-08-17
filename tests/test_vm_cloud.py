@@ -33,7 +33,7 @@ def test_get_asset_cloud(cloud_client: TestClient) -> None:
 def test_search_assets_cloud(cloud_client: TestClient) -> None:
     r = cloud_client.post(
         "/assets/search",
-        json={"filters": [{"field": "ip-address", "operator": "starts-with", "value": "10."}], "match": "all"},
+        json={"cloud_query": "asset.host_name = 'prod-web-01.example.com'"},
     )
     assert r.status_code == 200
 
@@ -50,14 +50,18 @@ def test_get_asset_tags_cloud_returns_501(cloud_client: TestClient) -> None:
 
 # --- vulnerabilities router ---
 
-def test_list_vulnerabilities_cloud_returns_501(cloud_client: TestClient) -> None:
+def test_list_vulnerabilities_cloud(cloud_client: TestClient) -> None:
     r = cloud_client.get("/vulnerabilities")
-    assert r.status_code == 501
+    assert r.status_code == 200
+    body = r.json()
+    assert "data" in body or "resources" in body
 
 
-def test_get_vulnerability_cloud_returns_501(cloud_client: TestClient) -> None:
-    r = cloud_client.get("/vulnerabilities/CVE-2024-0001")
-    assert r.status_code == 501
+def test_get_vulnerability_cloud(cloud_client: TestClient) -> None:
+    r = cloud_client.get("/vulnerabilities/openssl-cve-2022-0778")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["id"] == "openssl-cve-2022-0778"
 
 
 # --- scans router ---
@@ -69,6 +73,49 @@ def test_list_scans_cloud(cloud_client: TestClient) -> None:
 
 def test_get_scan_cloud(cloud_client: TestClient) -> None:
     r = cloud_client.get("/scans/1")
+    assert r.status_code == 200
+
+
+def test_start_scan_cloud(cloud_client: TestClient) -> None:
+    r = cloud_client.post("/scans", json={"name": "Cloud Test Scan"})
+    assert r.status_code == 200
+    body = r.json()
+    assert "scans" in body
+
+
+def test_stop_scan_cloud(cloud_client: TestClient) -> None:
+    r = cloud_client.post("/scans/test-scan-id/stop")
+    assert r.status_code == 200
+
+
+def test_list_scan_engines_cloud(cloud_client: TestClient) -> None:
+    r = cloud_client.get("/scans/engine")
+    assert r.status_code == 200
+    body = r.json()
+    assert "data" in body
+
+
+def test_get_scan_engine_cloud(cloud_client: TestClient) -> None:
+    r = cloud_client.get("/scans/engine/test-engine-id")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "HEALTHY"
+
+
+def test_update_scan_engine_configuration_cloud(cloud_client: TestClient) -> None:
+    r = cloud_client.post(
+        "/scans/engine/test-engine-id/configuration",
+        json={"properties": ["com.rapid7.nexpose.jessValidation:1"]},
+    )
+    assert r.status_code == 200
+
+
+def test_remove_scan_engine_configuration_cloud(cloud_client: TestClient) -> None:
+    r = cloud_client.request(
+        "DELETE",
+        "/scans/engine/test-engine-id/configuration",
+        json={"properties": ["com.rapid7.nexpose.jessValidation"]},
+    )
     assert r.status_code == 200
 
 
@@ -105,3 +152,10 @@ def test_get_vm_health_cloud(cloud_client: TestClient) -> None:
 def test_get_vm_health_local_returns_501(client: TestClient) -> None:
     r = client.get("/vm/health")
     assert r.status_code == 501
+def test_search_assets_cloud_unsupported_legacy_filters(cloud_client: TestClient) -> None:
+    r = cloud_client.post(
+        "/assets/search",
+        json={"filters": [{"field": "ip-address", "operator": "starts-with", "value": "10."}], "match": "all"},
+    )
+    assert r.status_code == 400
+    assert "cloud_query" in r.json()["detail"]

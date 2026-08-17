@@ -6,7 +6,10 @@ from fastapi_mcp import FastApiMCP
 from rapid7_mcp.routers import (
     asset_groups,
     assets,
+    connect,
     idr,
+    idr_detection_rules,
+    idr_entities,
     metasploit,
     remediation,
     reports,
@@ -21,7 +24,7 @@ app = FastAPI(
     description=(
         "Unified MCP server exposing Rapid7 vulnerability and threat management tools to LLM clients. "
         "Covers InsightVM (vulnerability management), InsightIDR (SIEM/investigations), "
-        "and Metasploit Pro (pentest telemetry, read-only). "
+        "Automation (InsightConnect), and Metasploit Pro (pentest telemetry, read-only). "
         "Set DEMO_MODE=true to explore all tools without live credentials."
     ),
     version="0.1.0",
@@ -44,7 +47,16 @@ app.include_router(reports.router, prefix="/reports", tags=["InsightVM · Report
 app.include_router(vm_health.router, prefix="/vm", tags=["InsightVM · Health (cloud)"])
 
 # InsightIDR — cloud SIEM
-app.include_router(idr.router, prefix="/idr", tags=["InsightIDR"])
+app.include_router(idr.router, prefix="/idr", tags=["InsightIDR · Investigations"])
+app.include_router(idr_entities.router, prefix="/idr", tags=["InsightIDR · Entity Context"])
+app.include_router(
+    idr_detection_rules.router,
+    prefix="/idr/detection-rules",
+    tags=["InsightIDR · Detection Rules"],
+)
+
+# Automation (InsightConnect)
+app.include_router(connect.router, prefix="/connect", tags=["InsightConnect · Automation"])
 
 # Metasploit Pro — read-only pentest telemetry
 app.include_router(metasploit.router, prefix="/metasploit", tags=["Metasploit Pro (read-only)"])

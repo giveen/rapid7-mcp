@@ -1,0 +1,11 @@
+{
+  "rrn": "rrn:comments:us:abc123def456:comment:CMT-001",
+  "body": "Investigated and confirmed benign — international contractor sign-in from expected region.",
+  "target": "rrn:investigation:us:abc123def456:investigation:INV-002",
+  "visibility": "public",
+  "createdTime": "2024-01-15T10:00:00.000Z",
+  "author": {
+    "name": "Jeremy Morales",
+    "email": "JMorales@savers.com"
+  }
+}
