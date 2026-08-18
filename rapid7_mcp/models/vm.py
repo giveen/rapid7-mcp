@@ -4,6 +4,127 @@ from pydantic import BaseModel, Field
 
 from rapid7_mcp.models.shared import Link, PageInfo, SearchCriterion
 
+# ---------------------------------------------------------------------------
+# InsightVM v4 Cloud Integration API — Asset models
+# These match the /vm/v4/integration/assets response shape exactly.
+# ---------------------------------------------------------------------------
+
+
+class CloudAssetTag(BaseModel):
+    name: str | None = None
+    type: str | None = None  # OWNER | SITE | CUSTOM | ...
+
+    model_config = {"extra": "allow"}
+
+
+class CloudAssetUniqueIdentifier(BaseModel):
+    id: str | None = None
+    source: str | None = None  # R7 Agent | Endpoint Agent | active-directory | CSPRODUCT | ...
+
+    model_config = {"extra": "allow"}
+
+
+class CloudAssetCredentialAssessment(BaseModel):
+    port: int | None = None
+    protocol: str | None = None
+    status: str | None = None  # SUPPLIED_FAILED | NO_CREDS_SUPPLIED | SUCCESS | ...
+
+    model_config = {"extra": "allow"}
+
+
+class CloudAssetSort(BaseModel):
+    field: str = Field(..., description="Sort field, e.g. 'risk-score'")
+    order: str = Field("DESC", description="Sort direction: ASC or DESC")
+
+
+class CloudAsset(BaseModel):
+    """A single asset from the InsightVM v4 Cloud Integration API."""
+
+    id: str | None = None
+    host_name: str | None = None
+    ip: str | None = None
+    mac: str | None = None
+    os_family: str | None = None
+    os_name: str | None = None
+    os_description: str | None = None
+    os_vendor: str | None = None
+    os_version: str | None = None
+    os_architecture: str | None = None
+    os_system_name: str | None = None
+    os_type: str | None = None
+    risk_score: float | None = None
+    critical_vulnerabilities: int | None = None
+    severe_vulnerabilities: int | None = None
+    moderate_vulnerabilities: int | None = None
+    total_vulnerabilities: int | None = None
+    exploits: int | None = None
+    malware_kits: int | None = None
+    assessed_for_vulnerabilities: bool | None = None
+    assessed_for_policies: bool | None = None
+    last_assessed_for_vulnerabilities: str | None = None
+    last_scan_start: str | None = None
+    last_scan_end: str | None = None
+    type: str | None = None  # guest | host
+    tags: list[CloudAssetTag] = []
+    unique_identifiers: list[CloudAssetUniqueIdentifier] = []
+    credential_assessments: list[CloudAssetCredentialAssessment] = []
+
+    model_config = {"populate_by_name": True, "extra": "allow"}
+
+
+class CloudAssetMetadata(BaseModel):
+    number: int | None = None
+    size: int | None = None
+    total_resources: int | None = Field(None, alias="totalResources")
+    total_pages: int | None = Field(None, alias="totalPages")
+    cursor: str | None = None
+    effective_time: str | None = None
+
+    model_config = {"populate_by_name": True, "extra": "allow"}
+
+
+class CloudAssetList(BaseModel):
+    """Paginated asset list from the InsightVM v4 Cloud Integration API."""
+
+    data: list[CloudAsset] = []
+    metadata: CloudAssetMetadata = Field(default_factory=lambda: CloudAssetMetadata.model_construct())
+    links: list[Link] = []
+
+
+class CloudAssetSearchRequest(BaseModel):
+    """Request body for POST /vm/v4/integration/assets (searchIntegrationAssets).
+
+    The ``asset`` field accepts a LEQL expression to filter results.
+    Leave empty to return all assets (paginated).
+
+    LEQL filter examples:
+      - ``asset.os_family = 'Windows'``
+      - ``asset.os_family = 'Linux'``
+      - ``asset.host_name contains 'web'``
+      - ``asset.risk_score > 50000``
+      - ``asset.os_family = 'Windows' && asset.risk_score > 10000``
+    """
+
+    asset: str | None = Field(
+        None,
+        description=(
+            "LEQL filter expression. Examples: "
+            "\"asset.os_family = 'Windows'\", "
+            "\"asset.host_name contains 'prod'\", "
+            "\"asset.risk_score > 50000\""
+        ),
+    )
+    sort: list[CloudAssetSort] = Field(
+        default_factory=list,
+        description="Sort order, e.g. [{\"field\": \"risk-score\", \"order\": \"DESC\"}]",
+    )
+    size: int = Field(
+        10,
+        ge=1,
+        le=100,
+        description="Page size (1–100, default 10)",
+    )
+
 
 class Site(BaseModel):
     id: int

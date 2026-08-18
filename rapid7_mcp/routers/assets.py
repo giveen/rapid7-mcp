@@ -12,6 +12,8 @@ from rapid7_mcp.models import (
     AssetSearchRequest,
     AssetTagList,
     AssetVulnerabilityList,
+    CloudAssetList,
+    CloudAssetSearchRequest,
 )
 
 router = APIRouter()
@@ -108,6 +110,52 @@ async def search_assets(
         body=body.model_dump(),
     )
     return AssetList(**data)
+
+
+@router.post(
+    "/cloud/search",
+    response_model=CloudAssetList,
+    operation_id="search_integration_assets",
+    summary="Search InsightVM assets via Cloud Integration API (v4)",
+    description=(
+        "Search and filter assets using the InsightVM v4 Cloud Integration API "
+        "(POST /vm/v4/integration/assets — searchIntegrationAssets). "
+        "Returns the full cloud asset schema: vulnerability counts by severity, "
+        "risk score, OS details, tags, unique identifiers (R7 Agent, AD, CSPRODUCT), "
+        "credential assessment results, and last-scan timestamps. "
+        "Use the LEQL ``asset`` filter to narrow results. Examples:\n"
+        "  - All Windows assets: ``asset.os_family = 'Windows'``\n"
+        "  - High-risk assets: ``asset.risk_score > 50000``\n"
+        "  - Hostname contains 'prod': ``asset.host_name contains 'prod'``\n"
+        "  - Combined: ``asset.os_family = 'Linux' && asset.risk_score > 10000``\n"
+        "Paginate with the ``cursor`` token from metadata.cursor. "
+        "Sort by risk-score (DESC) to see the most critical assets first. "
+        "This tool is only available when R7_INSIGHT_INSTALL=cloud."
+    ),
+)
+async def search_integration_assets(
+    body: CloudAssetSearchRequest,
+    cursor: str | None = Query(None, description="Cursor token from a previous response for next-page navigation"),
+    settings: Settings = Depends(get_settings),
+    client: InsightVMClient = Depends(get_client),
+) -> CloudAssetList:
+    if settings.insight_install != "cloud":
+        raise HTTPException(
+            status_code=501,
+            detail=(
+                "search_integration_assets requires R7_INSIGHT_INSTALL=cloud. "
+                "For on-prem consoles use search_assets instead."
+            ),
+        )
+    cloud_body: dict[str, Any] = {"size": body.size}
+    if body.asset:
+        cloud_body["asset"] = body.asset
+    if body.sort:
+        cloud_body["sort"] = [s.model_dump() for s in body.sort]
+    if cursor:
+        cloud_body["cursor"] = cursor
+    data = await client.post("/v4/integration/assets", body=cloud_body)
+    return CloudAssetList(**data)
 
 
 @router.get(

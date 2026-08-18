@@ -74,12 +74,13 @@ def _resolve_vm_fixture(method: str, path: str) -> str | None:
     clean = path.split("?")[0].rstrip("/")
     parts = [p for p in clean.split("/") if p]
 
-    # POST /assets/search and POST /v4/integration/assets both list assets
-    if method == "POST" and len(parts) >= 2 and tuple(parts[-2:]) in (
-        ("assets", "search"),
-        ("integration", "assets"),
-    ):
+    # POST /assets/search → on-prem asset list
+    if method == "POST" and len(parts) >= 2 and tuple(parts[-2:]) == ("assets", "search"):
         return "assets.json"
+
+    # POST /v4/integration/assets → cloud asset list (different schema)
+    if method == "POST" and len(parts) >= 3 and tuple(parts[-3:]) == ("v4", "integration", "assets"):
+        return "cloud_assets.json"
 
     # Strip the cloud prefix /v4/integration/...
     if len(parts) >= 3 and parts[0] == "v4" and parts[1] == "integration":
