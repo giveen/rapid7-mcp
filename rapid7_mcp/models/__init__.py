@@ -32,6 +32,7 @@ from rapid7_mcp.models.idr import (
     IdrDetectionRuleState,
     IdrDetectionRuleThreat,
     IdrEntitySearchRequest,
+    IdrMetrics,
     IdrUser,
     IdrUserList,
     Indicator,
@@ -60,6 +61,7 @@ from rapid7_mcp.models.ms import (
 )
 from rapid7_mcp.models.shared import Link, PageInfo, SearchCriterion
 from rapid7_mcp.models.vm import (
+    AgentSummary,
     Asset,
     AssetGroup,
     AssetGroupList,
@@ -93,6 +95,7 @@ from rapid7_mcp.models.vm import (
 
 __all__ = [
     "AddCommentRequest",
+    "AgentSummary",
     "Asset", "AssetGroup", "AssetGroupList", "AssetList", "AssetSearchRequest",
     "AssignInvestigationRequest",
     "Assignee",
@@ -111,6 +114,7 @@ __all__ = [
     "IdrDetectionRule", "IdrDetectionRuleDetail", "IdrDetectionRuleList",
     "IdrDetectionRuleState", "IdrDetectionRuleThreat",
     "IdrEntitySearchRequest",
+    "IdrMetrics",
     "IdrUser", "IdrUserList",
     "Indicator", "IndicatorList",
     "Investigation", "InvestigationAlert", "InvestigationAlertList",

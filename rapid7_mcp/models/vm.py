@@ -278,3 +278,11 @@ class VmHealth(BaseModel):
     summary: VmHealthSummary | None = None
 
     model_config = {"populate_by_name": True, "extra": "allow"}
+
+
+class AgentSummary(BaseModel):
+    """Rapid7 Insight Agent deployment summary from the InsightVM cloud API."""
+
+    total_agents: int = 0
+    source: str = ""
+    note: str = ""

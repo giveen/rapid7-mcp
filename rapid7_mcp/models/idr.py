@@ -319,3 +319,30 @@ class IdrDetectionRuleList(BaseModel):
     data: list[IdrDetectionRule] = []
     metadata: dict = {}
     position: str | None = None  # cursor for next page
+
+
+# ---------------------------------------------------------------------------
+# SOC metrics model  (/idr/metrics)
+# ---------------------------------------------------------------------------
+
+
+class IdrMetrics(BaseModel):
+    """Pre-computed SOC KPIs for a date range.
+
+    MTTR and MTTA are expressed in decimal hours.
+    """
+
+    period_start: str
+    period_end: str
+    total_investigations: int = 0
+    by_status: dict[str, int] = {}
+    by_priority: dict[str, int] = {}
+    by_source: dict[str, int] = {}
+    by_responsibility: dict[str, int] = {}
+    assigned_count: int = 0
+    unassigned_count: int = 0
+    closed_count: int = 0
+    mttr_avg_hours: float | None = None
+    mttr_median_hours: float | None = None
+    mtta_avg_hours: float | None = None
+    mtta_note: str = ""

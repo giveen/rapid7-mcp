@@ -4,12 +4,14 @@ from fastapi import FastAPI
 from fastapi_mcp import FastApiMCP
 
 from rapid7_mcp.routers import (
+    agents,
     asset_groups,
     assets,
     connect,
     idr,
     idr_detection_rules,
     idr_entities,
+    idr_metrics,
     metasploit,
     remediation,
     reports,
@@ -45,6 +47,7 @@ app.include_router(
 )
 app.include_router(reports.router, prefix="/reports", tags=["InsightVM · Reports"])
 app.include_router(vm_health.router, prefix="/vm", tags=["InsightVM · Health (cloud)"])
+app.include_router(agents.router, prefix="/agents", tags=["InsightVM · Agents"])
 
 # InsightIDR — cloud SIEM
 app.include_router(idr.router, prefix="/idr", tags=["InsightIDR · Investigations"])
@@ -54,6 +57,7 @@ app.include_router(
     prefix="/idr/detection-rules",
     tags=["InsightIDR · Detection Rules"],
 )
+app.include_router(idr_metrics.router, prefix="/idr/metrics", tags=["InsightIDR · SOC Metrics"])
 
 # Automation (InsightConnect)
 app.include_router(connect.router, prefix="/connect", tags=["InsightConnect · Automation"])
