@@ -1,0 +1,50 @@
+{
+  "data": [
+    {
+      "rule_set": "DR",
+      "rrn": "rrn:cba:::detection-rule:YB347ZIVVE0V",
+      "state": {"value": "ACTIVE", "reason": null},
+      "rule": {
+        "name": "Account Compromise - ASREP Roast Ticket and Account Logon",
+        "description": "Detects AS-REP roasting attack followed by successful account logon.",
+        "recommendation": "Verify activity order and scope impacted accounts.",
+        "rule_action": "CREATES_ALERTS",
+        "priority_level": "HIGH",
+        "tactics": ["TA0006"],
+        "techniques": ["T1558.004"]
+      },
+      "threats": [{"rrn": "rrn:cba:::threat:7MCMGE0U0QRC", "name": "Suspicious Asset Authentications", "detection_rule_count": 59}],
+      "event_types": ["asset_auth"],
+      "detection_count": 0,
+      "create_date": "2025-01-29T19:19:21.215347Z",
+      "last_modified_date": "2025-01-29T19:19:21.215347Z",
+      "last_detected_date": null,
+      "responsibility": "MDR",
+      "exception_count": 0
+    },
+    {
+      "rule_set": "SENTINEL",
+      "rrn": "rrn:cba:::detection-rule:SENTINEL-TRAVEL",
+      "state": {"value": "ACTIVE", "reason": null},
+      "rule": {
+        "name": "Microsoft Sentinel - Correlate Unfamiliar sign-in properties & atypical travel alerts",
+        "description": "Correlates Entra ID risk events for unfamiliar sign-in properties combined with atypical travel.",
+        "recommendation": "Verify if travel and sign-in are expected for the user.",
+        "rule_action": "CREATES_ALERTS",
+        "priority_level": "HIGH",
+        "tactics": ["TA0001"],
+        "techniques": ["T1078"]
+      },
+      "threats": [],
+      "event_types": ["authentication"],
+      "detection_count": 8,
+      "create_date": "2023-06-01T00:00:00.000Z",
+      "last_modified_date": "2024-01-01T00:00:00.000Z",
+      "last_detected_date": "2026-08-13T18:08:00.000Z",
+      "responsibility": "MDR",
+      "exception_count": 0
+    }
+  ],
+  "metadata": {"size": 20, "cdr": {"limit": 200, "used": 2, "remaining": 198}, "rule_counts": null},
+  "position": null
+}

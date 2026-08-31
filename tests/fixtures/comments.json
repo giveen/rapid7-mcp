@@ -1,0 +1,32 @@
+{
+  "data": [
+    {
+      "rrn": "rrn:comments:us:abc123def456:comment:CMT-001",
+      "body": "Investigated and confirmed benign — international contractor sign-in from expected region.",
+      "target": "rrn:investigation:us:abc123def456:investigation:INV-002",
+      "visibility": "public",
+      "createdTime": "2024-01-15T10:00:00.000Z",
+      "author": {
+        "name": "Jeremy Morales",
+        "email": "JMorales@savers.com"
+      }
+    },
+    {
+      "rrn": "rrn:comments:us:abc123def456:comment:CMT-002",
+      "body": "Following up — verified user is on the approved contractor list.",
+      "target": "rrn:investigation:us:abc123def456:investigation:INV-002",
+      "visibility": "public",
+      "createdTime": "2024-01-15T11:30:00.000Z",
+      "author": {
+        "name": "Jeremy Morales",
+        "email": "JMorales@savers.com"
+      }
+    }
+  ],
+  "metadata": {
+    "index": 0,
+    "size": 20,
+    "total_pages": 1,
+    "total_data": 2
+  }
+}

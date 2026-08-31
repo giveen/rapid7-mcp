@@ -1,0 +1,10 @@
+{
+  "rrn": "rrn:uba:us:abc123def456:account:ACCT-002",
+  "name": "adminsmith",
+  "domain": "CORP",
+  "accountType": "DOMAIN",
+  "privileged": true,
+  "locked": false,
+  "disabled": false,
+  "lastAuthenticationTime": "2024-01-14T17:00:00.000Z"
+}

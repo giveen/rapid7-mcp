@@ -1,0 +1,16 @@
+{
+  "id": "fd55b0ef-52df-4e36-81d5-17e648d65712",
+  "host_name": "ps5-rp7-app02",
+  "status": "HEALTHY",
+  "name": "ps5-rp7-app02:2789",
+  "profile": {
+    "configuration": {
+      "last_retrieved": "2026-08-16T17:46:52Z",
+      "properties": [
+        "com.rapid7.nexpose.nsc.web.cache:1",
+        "com.rapid7.nexpose.jessValidation:1"
+      ]
+    }
+  },
+  "registered": "2026-04-16T20:11:20.160Z"
+}

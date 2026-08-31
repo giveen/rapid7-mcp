@@ -1,0 +1,98 @@
+{
+  "data": [
+    {
+      "assessed_for_policies": true,
+      "assessed_for_vulnerabilities": true,
+      "credential_assessments": [
+        {"port": 445, "protocol": "TCP", "status": "SUPPLIED_FAILED"},
+        {"port": 1433, "protocol": "TCP", "status": "NO_CREDS_SUPPLIED"}
+      ],
+      "critical_vulnerabilities": 214,
+      "exploits": 2,
+      "host_name": "prod-sql1.example.com",
+      "id": "demo-asset-00001",
+      "ip": "10.10.1.50",
+      "last_assessed_for_vulnerabilities": "2026-07-15T08:00:00Z",
+      "last_scan_end": "2026-07-15T08:05:00Z",
+      "last_scan_start": "2026-07-15T08:00:00Z",
+      "mac": "00:50:56:8C:00:01",
+      "malware_kits": 0,
+      "moderate_vulnerabilities": 5,
+      "os_architecture": "x86_64",
+      "os_description": "Microsoft Windows Server 2022 Standard Edition",
+      "os_family": "Windows",
+      "os_name": "Windows Server 2022 Standard Edition",
+      "os_system_name": "Microsoft Windows",
+      "os_type": "Server",
+      "os_vendor": "Microsoft",
+      "os_version": "21H2",
+      "risk_score": 218500.0,
+      "severe_vulnerabilities": 180,
+      "tags": [
+        {"name": "Production", "type": "CUSTOM"},
+        {"name": "SysOps", "type": "OWNER"},
+        {"name": "Rapid7 Insight Agents", "type": "SITE"}
+      ],
+      "total_vulnerabilities": 399,
+      "type": "guest",
+      "unique_identifiers": [
+        {"id": "aabbcc1122334455aabbcc1122334455", "source": "R7 Agent"},
+        {"id": "CN=PROD-SQL1,OU=Servers,DC=example,DC=com", "source": "active-directory"}
+      ],
+      "new": [],
+      "remediated": []
+    },
+    {
+      "assessed_for_policies": false,
+      "assessed_for_vulnerabilities": true,
+      "credential_assessments": [
+        {"port": 22, "protocol": "TCP", "status": "SUCCESS"}
+      ],
+      "critical_vulnerabilities": 3,
+      "exploits": 0,
+      "host_name": "prod-web01.example.com",
+      "id": "demo-asset-00002",
+      "ip": "10.10.1.80",
+      "last_assessed_for_vulnerabilities": "2026-07-14T20:00:00Z",
+      "last_scan_end": "2026-07-14T20:12:00Z",
+      "last_scan_start": "2026-07-14T20:00:00Z",
+      "mac": "00:50:56:8C:00:02",
+      "malware_kits": 0,
+      "moderate_vulnerabilities": 12,
+      "os_architecture": "x86_64",
+      "os_description": "Ubuntu Linux 22.04",
+      "os_family": "Linux",
+      "os_name": "Ubuntu 22.04 LTS",
+      "os_system_name": "Linux",
+      "os_type": "Server",
+      "os_vendor": "Canonical",
+      "os_version": "22.04",
+      "risk_score": 12400.0,
+      "severe_vulnerabilities": 8,
+      "tags": [
+        {"name": "Production", "type": "CUSTOM"},
+        {"name": "WebTeam", "type": "OWNER"},
+        {"name": "Rapid7 Insight Agents", "type": "SITE"}
+      ],
+      "total_vulnerabilities": 23,
+      "type": "guest",
+      "unique_identifiers": [
+        {"id": "99887766554433221100aabbccddeeff", "source": "R7 Agent"}
+      ],
+      "new": [],
+      "remediated": []
+    }
+  ],
+  "metadata": {
+    "number": 0,
+    "size": 10,
+    "totalResources": 12697,
+    "totalPages": 1270,
+    "cursor": "demo-cursor-page2",
+    "effective_time": "2026-07-15T12:00:00Z"
+  },
+  "links": [
+    {"href": "https://us.api.insight.rapid7.com/vm/v4/integration/assets?page=0&size=10", "rel": "self"},
+    {"href": "https://us.api.insight.rapid7.com/vm/v4/integration/assets?page=1&size=10&cursor=demo-cursor-page2", "rel": "next"}
+  ]
+}

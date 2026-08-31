@@ -16,6 +16,7 @@ def _reset_cloud_warning_flag() -> None:
 
 def _settings(**overrides: object) -> Settings:
     base: dict[str, object] = {
+        "insight_install": "local",
         "console_url": "https://console.example:3780",
         "username": "u",
         "password": "p",
@@ -81,6 +82,7 @@ def test_request_kwargs_cloud() -> None:
     assert kwargs["headers"]["X-Api-Key"] == "k"
 
 
-def test_settings_default_install_is_local() -> None:
-    s = Settings()
+def test_settings_default_install_is_local(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("R7_INSIGHT_INSTALL", raising=False)
+    s = Settings(_env_file=None)
     assert s.insight_install == "local"

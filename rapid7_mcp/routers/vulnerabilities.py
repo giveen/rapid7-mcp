@@ -1,5 +1,7 @@
 """Vulnerabilities router — InsightVM vulnerability library."""
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from rapid7_mcp.client import InsightVMClient, get_client
@@ -11,7 +13,6 @@ router = APIRouter()
 
 @router.get(
     "",
-    response_model=VulnerabilityList,
     operation_id="list_vulnerabilities",
     summary="List vulnerabilities",
     description=(
@@ -29,13 +30,11 @@ async def list_vulnerabilities(
     ),
     settings: Settings = Depends(get_settings),
     client: InsightVMClient = Depends(get_client),
-) -> VulnerabilityList:
+) -> Any:
     if settings.insight_install == "cloud":
-        raise HTTPException(
-            status_code=501,
-            detail="list_vulnerabilities is not available in the InsightVM cloud API; "
-            "use the cloud vulnerability search endpoint.",
-        )
+        query = f"severity = '{severity.lower()}'" if severity else None
+        body: dict[str, str] = {"vulnerability": query} if query else {}
+        return await client.post("/v4/integration/vulnerabilities", body=body)
     params: dict = {"page": page, "size": size}
     if severity:
         params["severity"] = severity
@@ -45,7 +44,6 @@ async def list_vulnerabilities(
 
 @router.get(
     "/{vuln_id}",
-    response_model=Vulnerability,
     operation_id="get_vulnerability",
     summary="Get vulnerability details",
     description=(
@@ -57,11 +55,15 @@ async def get_vulnerability(
     vuln_id: str,
     settings: Settings = Depends(get_settings),
     client: InsightVMClient = Depends(get_client),
-) -> Vulnerability:
+) -> Any:
     if settings.insight_install == "cloud":
-        raise HTTPException(
-            status_code=501,
-            detail="get_vulnerability is not available in the InsightVM cloud API.",
+        data = await client.post(
+            "/v4/integration/vulnerabilities",
+            body={"vulnerability": f"id = '{vuln_id}'"},
         )
+        resources = data.get("data") or data.get("resources", [])
+        if not resources:
+            raise HTTPException(status_code=404, detail=f"Vulnerability '{vuln_id}' not found")
+        return resources[0]
     data = await client.get(f"/vulnerabilities/{vuln_id}")
     return Vulnerability(**data)

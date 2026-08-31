@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     idr_region: str = Field(default="us", validation_alias="IDR_REGION")
     idr_api_key: str = Field(default="", validation_alias="IDR_API_KEY")
 
+    # Automation (InsightConnect) API, X-Api-Key.
+    # Defaults to IDR region and API key when not explicitly set.
+    connect_region: str = Field(default="", validation_alias="CONNECT_REGION")
+    connect_api_key: str = Field(default="", validation_alias="CONNECT_API_KEY")
+
     # Metasploit Pro (local/remote MSP console, token auth, read-only)
     msp_url: str = Field(default="https://localhost:3790", validation_alias="MSP_URL")
     msp_token: str = Field(default="", validation_alias="MSP_TOKEN")

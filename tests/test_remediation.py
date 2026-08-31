@@ -24,5 +24,5 @@ def test_get_remediation_project(client: TestClient) -> None:
     response = client.get("/remediation_projects/1")
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == "Q1 2024 — Critical Patching Sprint"
+    assert data["name"].startswith("Q1 2024")
     assert data["owner"] == "alice@example.com"

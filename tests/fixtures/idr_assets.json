@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "rrn": "rrn:uba:us:0d9e151d-c6bc-4a17-b9e2-acbc9f544244:asset:00BEYKGRK2Y7",
+      "name": "1212tag5.savers.com"
+    },
+    {
+      "rrn": "rrn:uba:us:0d9e151d-c6bc-4a17-b9e2-acbc9f544244:asset:ASSET002",
+      "name": "dc01.savers.com"
+    }
+  ],
+  "metadata": {
+    "index": 0,
+    "size": 20,
+    "total_pages": 1,
+    "total_data": 2
+  }
+}

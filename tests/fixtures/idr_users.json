@@ -1,0 +1,22 @@
+{
+  "data": [
+    {
+      "rrn": "rrn:uba:us:0d9e151d-c6bc-4a17-b9e2-acbc9f544244:user:USR-001",
+      "first_name": "Duncan",
+      "last_name": "Vansickle",
+      "name": "Duncan Vansickle"
+    },
+    {
+      "rrn": "rrn:uba:us:0d9e151d-c6bc-4a17-b9e2-acbc9f544244:user:USR-002",
+      "first_name": "Jeremy",
+      "last_name": "Morales",
+      "name": "Jeremy Morales"
+    }
+  ],
+  "metadata": {
+    "index": 0,
+    "size": 20,
+    "total_pages": 1,
+    "total_data": 2
+  }
+}
